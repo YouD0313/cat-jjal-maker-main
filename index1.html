@@ -44,6 +44,16 @@
 				},
 			};
 
+			const fetchCat = async (text) => {
+				const OPEN_API_DOMAIN = 'https://cataas.com';
+				const response = await fetch(
+					`${OPEN_API_DOMAIN}/cat/says/${text}?json=true`
+				);
+				const responseJson = await response.json();
+				const responseUrl = response.url.slice(0, response.url.indexOf('?'));
+				return `${responseUrl}`;
+			};
+
 			console.log('야옹');
 
 			const Title = (props) => {
@@ -73,7 +83,7 @@
 						setErrorMessage('빈 값으로 만들 수 없습니다.');
 						return;
 					}
-					updateMainCat();
+					updateMainCat(value);
 				}
 
 				return (
@@ -146,8 +156,10 @@
 				);
 				const [heart, setHeart] = React.useState('🤍');
 
-				function updateMainCat() {
-					setMainCat(CAT2);
+				async function updateMainCat(value) {
+					const newCat = await fetchCat(value);
+
+					setMainCat(newCat);
 					const nextCounter = counter + 1;
 					setCounter(nextCounter);
 					jsonLocalStorage.setItem('counter', nextCounter);
