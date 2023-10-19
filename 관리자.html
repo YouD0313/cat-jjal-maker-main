@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>관리자페이지</title>
+		<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.4.min.js"></script>
+		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+		<script src="admin.php?cid=<?=time();?>" defer></script>
+	</head>
+	<style>
+		body {
+		}
+
+		.container__whole {
+			width: 100%;
+			margin: 0 auto;
+		}
+
+		.div__flex {
+			width: 70%;
+			margin: 0 auto;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.container__branch {
+			width: 55%;
+			margin: 0 auto;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.container__table table {
+			margin: 0 auto;
+		}
+
+		.container__table tr,
+		.container__table th,
+		.container__table td {
+			height: 2rem;
+		}
+
+		.table__input {
+			width: 28rem;
+			height: 1.5rem;
+			border: 1.8px solid green;
+		}
+
+		.input__block {
+			display: block;
+		}
+
+		.container__bottomButton {
+			width: 8rem;
+			margin: auto;
+		}
+
+		.div__center-button {
+			display: flex;
+			justify-content: space-between;
+		}
+	</style>
+	<body>
+		<div id="app"></div>
+		<div id="php"></div>
+		<script
+			src="https://unpkg.com/react@18/umd/react.development.js"
+			crossorigin
+		></script>
+		<script
+			src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+			crossorigin
+		></script>
+		<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+		<script type="text/babel">
+			// 헤더
+			function Header(props) {
+				return (
+					<div className='div__flex'>
+						<span>관리자페이지</span>
+						<span>Logout</span>
+					</div>
+				);
+			}
+
+			function Explain({ nabzplnm }) {
+				const [value, setValue] = React.useState(NA_BZPLNM[0]);
+				function handleSelectChange(e) {
+					let titleName = e.target.value;
+					setValue(titleName);
+				}
+
+				return (
+					<div className='container__branch'>
+						<span>{value}</span>
+						<select name='branch' id='' onChange={handleSelectChange}>
+							{nabzplnm.map((na) => (
+								<option className='bzplnm' value={na} key={na}>
+									{na}
+								</option>
+							))}
+						</select>
+					</div>
+				);
+			}
+
+			// 메인페이지
+			function ChangeListTitle({ title }) {
+				return <th>{title}</th>;
+			}
+
+			function ChangeInput({
+				type,
+				defaultValue,
+				placeholder,
+				accept,
+				dataValue,
+			}) {
+				return (
+					<td>
+						<input
+							className='table__input'
+							type={type}
+							defaultValue={defaultValue}
+							placeholder={placeholder}
+							accept={accept}
+							data-value={dataValue}
+						/>
+					</td>
+				);
+			}
+
+			function ChangeButton(props) {
+				return <button type='submit'>수정</button>;
+			}
+
+			function ResetButton(props) {
+				return <button>원래대로</button>;
+			}
+
+			function AllButton(props) {
+				return (
+					<td>
+						<ChangeButton />
+						<ResetButton />
+					</td>
+				);
+			}
+
+			function ListTrBasic({
+				title,
+				type,
+				defaultValue,
+				placeholder,
+				dataValue,
+			}) {
+				return (
+					<tr>
+						<ChangeListTitle title={title} />
+						<ChangeInput
+							type={type}
+							defaultValue={defaultValue}
+							placeholder={placeholder}
+						/>
+						<AllButton />
+					</tr>
+				);
+			}
+
+			function ListTrImg({ title, defaultValue, placeholder, dataValue }) {
+				const render = () => {
+					const result = [];
+					for (let i = 0; i < dataValue; i++) {
+						result.push(
+							<input
+								className='table__input input__block'
+								type='file'
+								defaultValue={defaultValue}
+								placeholder={placeholder}
+								accept='.jpg,.jpeg,.png'
+								key={i + dataValue}
+							/>
+						);
+					}
+					return result;
+				};
+				return (
+					<tr>
+						<ChangeListTitle title={title} />
+						<td>{render()}</td>
+						<AllButton />
+					</tr>
+				);
+			}
+
+			function Table({ listTitle }) {
+				return (
+					<div className='container__table'>
+						<table>
+							<tbody>
+								{listTitle.map((title) => (
+									<ListTrBasic
+										title={title}
+										type='text'
+										key={title}
+										dataValue={1}
+									/>
+								))}
+								<ListTrImg title='footer 이미지' dataValue={1} />
+								<ListTrImg title='상단 배너 이미지' dataValue={3} />
+							</tbody>
+						</table>
+					</div>
+				);
+			}
+
+			function BottomButton(props) {
+				return (
+					<div className='container__bottomButton'>
+						<div className='div__center-button'>
+							<ChangeButton />
+							<ResetButton />
+						</div>
+					</div>
+				);
+			}
+
+			function App(props) {
+				const listTitle = [
+					'사업장명',
+					'공지사항',
+					'사번',
+					'비밀번호',
+					'초기화시간',
+					'해상도 zoom 값',
+				];
+
+				return (
+					<div className='container__whole'>
+						<Header />
+						<Explain nabzplnm={NA_BZPLNM} />
+						<Table listTitle={listTitle} />
+						<BottomButton />
+					</div>
+				);
+			}
+
+			const renderThis = document.querySelector('#app');
+
+			ReactDOM.createRoot(renderThis).render(<App />);
+
+			const bzplnm = document.querySelectorAll('.bzplnm');
+			console.log(bzplnm);
+		</script>
+	</body>
+</html>

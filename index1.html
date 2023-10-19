@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>고양이 가라사대</title>
+	</head>
+	<style>
+		body {
+			text-align: center;
+		}
+		.main-card button {
+			position: relative;
+			left: -45px;
+			bottom: 15px;
+		}
+		.favorites {
+			list-style: none;
+			display: flex;
+			justify-content: center;
+			flex-wrap: wrap;
+			gap: 15px;
+		}
+	</style>
+	<body>
+		<div id="app"></div>
+		<script
+			src="https://unpkg.com/react@18/umd/react.development.js"
+			crossorigin
+		></script>
+		<script
+			src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+			crossorigin
+		></script>
+		<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+		<script type="text/babel">
+			const jsonLocalStorage = {
+				setItem: (key, value) => {
+					localStorage.setItem(key, JSON.stringify(value));
+				},
+				getItem: (key) => {
+					return JSON.parse(localStorage.getItem(key));
+				},
+			};
+
+			console.log('야옹');
+
+			const Title = (props) => {
+				return <h1>{props.children}</h1>;
+			};
+
+			const Form = ({ updateMainCat }) => {
+				const includesHangul = (text) => /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/i.test(text);
+
+				const [value, setValue] = React.useState('');
+				const [errorMesseage, setErrorMessage] = React.useState('');
+
+				function handleInputChange(e) {
+					const userValue = e.target.value;
+					setErrorMessage('');
+					if (includesHangul(userValue) == true) {
+						setErrorMessage('한글은 입력할 수 없습니다.');
+						// setValue('');
+					}
+					setValue(userValue.toUpperCase());
+				}
+
+				function handleFormSubmit(e) {
+					e.preventDefault();
+					setErrorMessage('');
+					if (value === '') {
+						setErrorMessage('빈 값으로 만들 수 없습니다.');
+						return;
+					}
+					updateMainCat();
+				}
+
+				return (
+					<form onSubmit={handleFormSubmit}>
+						<input
+							type='text'
+							name='name'
+							placeholder='영어 대사를 입력해주세요'
+							value={value}
+							onChange={handleInputChange}
+						/>
+						<button type='submit'>생성</button>
+						<p style={{ color: 'red' }}>{errorMesseage}</p>
+					</form>
+				);
+			};
+
+			function CatItem(props) {
+				return (
+					<li>
+						{props.title}
+						<img src={props.img} style={{ width: '150px' }} />
+					</li>
+				);
+			}
+
+			function Favorites({ favorites }) {
+				return (
+					<ul className='favorites'>
+						{favorites.map((cat) => (
+							<CatItem img={cat} key={cat} />
+						))}
+					</ul>
+				);
+			}
+
+			function MainCard({ img, onHeartClick, heart }) {
+				return (
+					<div className='main-card'>
+						<img src={img} alt='고양이' width='400' />
+						<button onClick={onHeartClick}>{heart}</button>
+					</div>
+				);
+			}
+
+			let count = 0;
+			function App(props) {
+				const CAT1 = 'https://cataas.com/cat/HSENVDU4ZMqy7KQ0/says/react';
+				const CAT2 = 'https://cataas.com/cat/BxqL2EjFmtxDkAm2/says/inflearn';
+				const CAT3 = 'https://cataas.com/cat/18MD6byVC1yKGpXp/says/JavaScript';
+
+				// const CAT1 =
+				// 	'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&w=1443';
+				// const CAT2 =
+				// 	'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&q=80&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&w=1470';
+				// const CAT3 =
+				// 	'https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?auto=format&fit=crop&q=80&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&w=1480';
+
+				const [counter, setCounter] = React.useState(
+					jsonLocalStorage.getItem('counter') + 1
+				);
+				// 위의 줄과 같음
+				// const counterState = React.useState(1);
+				// const counter = counterState[0];
+				// const setCounter = counterState[1];
+
+				const [mainCat, setMainCat] = React.useState(CAT1);
+				const [favorites, setFavorites] = React.useState(
+					jsonLocalStorage.getItem('favorites') || []
+				);
+				const [heart, setHeart] = React.useState('🤍');
+
+				function updateMainCat() {
+					setMainCat(CAT2);
+					const nextCounter = counter + 1;
+					setCounter(nextCounter);
+					jsonLocalStorage.setItem('counter', nextCounter);
+					setHeart('🤍');
+				}
+
+				function handleHeartClick() {
+					const nextFavorites = [...favorites, mainCat];
+					setFavorites(nextFavorites);
+					jsonLocalStorage.setItem('favorites', nextFavorites);
+					setHeart('❤️‍🔥');
+				}
+
+				return (
+					<div>
+						<Title>{counter}번째 고양이 가라사대</Title>
+						<Form updateMainCat={updateMainCat} />
+						<MainCard
+							img={mainCat}
+							onHeartClick={handleHeartClick}
+							heart={heart}
+						/>
+						<Favorites favorites={favorites} />
+					</div>
+				);
+			}
+
+			const 여기다가그려 = document.querySelector('#app');
+
+			ReactDOM.createRoot(여기다가그려).render(<App />);
+		</script>
+	</body>
+</html>
