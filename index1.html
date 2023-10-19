@@ -25,6 +25,7 @@
 	</style>
 	<body>
 		<div id="app"></div>
+
 		<script
 			src="https://unpkg.com/react@18/umd/react.development.js"
 			crossorigin
@@ -35,81 +36,38 @@
 		></script>
 		<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 		<script type="text/babel">
-			const jsonLocalStorage = {
-				setItem: (key, value) => {
-					localStorage.setItem(key, JSON.stringify(value));
-				},
-				getItem: (key) => {
-					return JSON.parse(localStorage.getItem(key));
-				},
-			};
-
-			const fetchCat = async (text) => {
-				const OPEN_API_DOMAIN = 'https://cataas.com';
-				const response = await fetch(
-					`${OPEN_API_DOMAIN}/cat/says/${text}?json=true`
-				);
-				const responseJson = await response.json();
-				const responseUrl = response.url.slice(0, response.url.indexOf('?'));
-				return `${responseUrl}`;
-			};
-
-			console.log('야옹');
-
-			const Title = (props) => {
-				return <h1>{props.children}</h1>;
-			};
-
-			const Form = ({ updateMainCat }) => {
-				const includesHangul = (text) => /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/i.test(text);
-
-				const [value, setValue] = React.useState('');
-				const [errorMesseage, setErrorMessage] = React.useState('');
-
-				function handleInputChange(e) {
-					const userValue = e.target.value;
-					setErrorMessage('');
-					if (includesHangul(userValue) == true) {
-						setErrorMessage('한글은 입력할 수 없습니다.');
-						// setValue('');
-					}
-					setValue(userValue.toUpperCase());
-				}
-
-				function handleFormSubmit(e) {
-					e.preventDefault();
-					setErrorMessage('');
-					if (value === '') {
-						setErrorMessage('빈 값으로 만들 수 없습니다.');
-						return;
-					}
-					updateMainCat(value);
-				}
-
+			function Title(props) {
 				return (
-					<form onSubmit={handleFormSubmit}>
-						<input
-							type='text'
-							name='name'
-							placeholder='영어 대사를 입력해주세요'
-							value={value}
-							onChange={handleInputChange}
-						/>
-						<button type='submit'>생성</button>
-						<p style={{ color: 'red' }}>{errorMesseage}</p>
-					</form>
+					<div>
+						<h1>{props.children}</h1>
+					</div>
 				);
-			};
+			}
+
+			function Form({ handleFormSubmit }, { handleCatImage }) {
+				return (
+					<div>
+						<form onSubmit={handleFormSubmit}>
+							<input
+								type='text'
+								className='name'
+								placeholder='영어 대사를 입력해주세요'
+							/>
+							<button type='submit' onClick={handleCatImage}>
+								생성
+							</button>
+						</form>
+					</div>
+				);
+			}
 
 			function CatItem(props) {
 				return (
 					<li>
-						{props.title}
 						<img src={props.img} style={{ width: '150px' }} />
 					</li>
 				);
 			}
-
 			function Favorites({ favorites }) {
 				return (
 					<ul className='favorites'>
@@ -120,68 +78,55 @@
 				);
 			}
 
-			function MainCard({ img, onHeartClick, heart }) {
+			const MainCard = ({ img, handleHeartClick }) => {
 				return (
 					<div className='main-card'>
 						<img src={img} alt='고양이' width='400' />
-						<button onClick={onHeartClick}>{heart}</button>
+						<button onClick={handleHeartClick}>🤍</button>
 					</div>
 				);
-			}
+			};
 
-			let count = 0;
+			// const app = (
+			// 	<div>
+			// 		<Title>1번째 고양이 가라사대</Title>
+			// 		<Title>2번째 고양이 가라사대</Title>
+			// 		<Form />
+			// 		<MainCard />
+			// 		<Favorites />
+			// 	</div>
+			// );
 			function App(props) {
 				const CAT1 = 'https://cataas.com/cat/HSENVDU4ZMqy7KQ0/says/react';
 				const CAT2 = 'https://cataas.com/cat/BxqL2EjFmtxDkAm2/says/inflearn';
 				const CAT3 = 'https://cataas.com/cat/18MD6byVC1yKGpXp/says/JavaScript';
 
-				// const CAT1 =
-				// 	'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&w=1443';
-				// const CAT2 =
-				// 	'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&q=80&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&w=1470';
-				// const CAT3 =
-				// 	'https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?auto=format&fit=crop&q=80&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&w=1480';
+				const [counter, setCounter] = React.useState(1);
+				const [catImage, setCatImage] = React.useState(CAT1);
+				const [favorites, setFavorites] = React.useState([CAT1, CAT2]);
 
-				const [counter, setCounter] = React.useState(
-					jsonLocalStorage.getItem('counter') + 1
-				);
-				// 위의 줄과 같음
-				// const counterState = React.useState(1);
+				console.log(favorites);
+
+				// const counter = React.useState(1);
 				// const counter = counterState[0];
 				// const setCounter = counterState[1];
 
-				const [mainCat, setMainCat] = React.useState(CAT1);
-				const [favorites, setFavorites] = React.useState(
-					jsonLocalStorage.getItem('favorites') || []
-				);
-				const [heart, setHeart] = React.useState('🤍');
-
-				async function updateMainCat(value) {
-					const newCat = await fetchCat(value);
-
-					setMainCat(newCat);
-					const nextCounter = counter + 1;
-					setCounter(nextCounter);
-					jsonLocalStorage.setItem('counter', nextCounter);
-					setHeart('🤍');
+				function handleFormSubmit(e) {
+					e.preventDefault();
+					setCounter(counter + 1);
+					setCatImage(CAT2);
 				}
 
-				function handleHeartClick() {
-					const nextFavorites = [...favorites, mainCat];
-					setFavorites(nextFavorites);
-					jsonLocalStorage.setItem('favorites', nextFavorites);
-					setHeart('❤️‍🔥');
+				function handleHeartClick(e) {
+					e.target.textContent = '❤️';
+					setFavorites([...favorites, CAT3]);
 				}
 
 				return (
 					<div>
 						<Title>{counter}번째 고양이 가라사대</Title>
-						<Form updateMainCat={updateMainCat} />
-						<MainCard
-							img={mainCat}
-							onHeartClick={handleHeartClick}
-							heart={heart}
-						/>
+						<Form handleFormSubmit={handleFormSubmit} />
+						<MainCard img={catImage} handleHeartClick={handleHeartClick} />
 						<Favorites favorites={favorites} />
 					</div>
 				);
